@@ -26,6 +26,7 @@
 #include "mil.h"
 #include "Application.h"
 #include "Clock.h"
+#include "ButtonManager.h"
 
 #ifdef ARDUINO
 #include "SparkFun_VEML6075_Arduino_Library.h"
@@ -77,6 +78,7 @@ class UVMeter : public mil::Application
 public:
 	UVMeter()
 		: mil::Application(LED_BUILTIN, Hostname, ConfigPortalName)
+		, _buttonManager([this](const mil::Button& b, mil::ButtonManager::Event e) { handleButtonEvent(b, e); })
     {    
         _clock = std::unique_ptr<mil::Clock>(new mil::Clock(this, ZipCode));
     }
@@ -98,8 +100,11 @@ private:
     
     void showString(const char* s, uint8_t line);
 
+    void handleButtonEvent(const mil::Button& button, mil::ButtonManager::Event event);
+
     std::unique_ptr<mil::Clock> _clock;
     
+	mil::ButtonManager _buttonManager;
     VEML6075 uv;
 
 };

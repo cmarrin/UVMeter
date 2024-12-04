@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		495174562CFF907E008F5262 /* ButtonManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49EB4B922CF778D10083A081 /* ButtonManager.cpp */; };
 		49EB4B892CF776DC0083A081 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49EB4B882CF776DC0083A081 /* main.cpp */; };
 		49EB59542CF7A6520083A081 /* UVMeter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49EB59532CF7A6520083A081 /* UVMeter.cpp */; };
 		49EB59552CF7A6C80083A081 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49EB4B8D2CF778D10083A081 /* Application.cpp */; };
@@ -216,6 +217,7 @@
 				49EB4B892CF776DC0083A081 /* main.cpp in Sources */,
 				49EB59562CF7ED850083A081 /* Clock.cpp in Sources */,
 				49EB59552CF7A6C80083A081 /* Application.cpp in Sources */,
+				495174562CFF907E008F5262 /* ButtonManager.cpp in Sources */,
 				49EB59572CF7ED930083A081 /* TimeWeatherServer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -112,9 +112,15 @@ UVMeter::showMain(bool force)
     
     // Now show the UV values. Print with 1 decimal digit
     float v1 = uv.uva();
+    if (v1 < 0) {
+        v1 = 0;
+    }
     int i1 = int(v1);
     int d1 = int((v1 - i1) * 10);
     float v2 = uv.uvb();
+    if (v1 < 0) {
+        v1 = 0;
+    }
     int i2 = int(v2);
     int d2 = int((v2 - i2) * 10);
     string = std::to_string(i1) + "." + std::to_string(d1) + " " + std::to_string(i2) + "." + std::to_string(d2);

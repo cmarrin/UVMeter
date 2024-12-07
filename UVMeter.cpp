@@ -147,9 +147,10 @@ UVMeter::showMain(bool force)
     }
     int i1 = int(v1);
     int d1 = int((v1 - i1) * 10);
+    
     float v2 = uv.uvb();
-    if (v1 < 0) {
-        v1 = 0;
+    if (v2 < 0) {
+        v2 = 0;
     }
     int i2 = int(v2);
     int d2 = int((v2 - i2) * 10);

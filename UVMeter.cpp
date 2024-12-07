@@ -88,7 +88,7 @@ UVMeter::showMain(bool force)
 {
     _display.clearDisplay();
 
-    std::string string;
+    CPString string;
     time_t t = _clock->currentTime();
 	struct tm timeinfo;
     gmtime_r(&t, &timeinfo);
@@ -101,7 +101,7 @@ UVMeter::showMain(bool force)
             hour -= 12;
         }
     }
-    string += std::to_string(hour);
+    string += ToString(hour);
     string += ":";
 
     uint8_t minute = timeinfo.tm_min;
@@ -109,7 +109,7 @@ UVMeter::showMain(bool force)
         string += "0";
     }
     
-    string += std::to_string(minute);
+    string += ToString(minute);
     showString(string.c_str(), TimeDateLine);
     
     // Now show the UV values. Print with 1 decimal digit
@@ -125,7 +125,7 @@ UVMeter::showMain(bool force)
     }
     int i2 = int(v2);
     int d2 = int((v2 - i2) * 10);
-    string = std::to_string(i1) + "." + std::to_string(d1) + " " + std::to_string(i2) + "." + std::to_string(d2);
+    string = ToString(i1) + "." + ToString(d1) + " " + ToString(i2) + "." + ToString(d2);
     
     showString(string.c_str(), MainLine);
     _display.display();

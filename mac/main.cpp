@@ -37,10 +37,10 @@ int main(int argc, const char * argv[])
         int c = getc();
         if (c == '1') {
             cout << " Got Click\n";
-            uvmeter.sendInput(mil::Input::Click);
+            uvmeter.sendInput(mil::Input::Click, false);
         } else if (c == '2') {
             cout << " Got Long Press\n";
-            uvmeter.sendInput(mil::Input::LongPress);
+            uvmeter.sendInput(mil::Input::LongPress, false);
         }
     }
     return 0;

@@ -102,7 +102,12 @@ UVMeter::showString(mil::Message m)
 
     _display.clearDisplay();
     showString(s.c_str(), MessageLine);
-    _needDisplay = true;
+    if (isInCallback()) {
+        _needDisplay = true;
+    } else {
+        _display.display();
+    }
+    
     startShowDoneTimer(2000);
 }
 
@@ -151,7 +156,11 @@ UVMeter::showMain(bool force)
     string = ToString(i1) + "." + ToString(d1) + " " + ToString(i2) + "." + ToString(d2);
     
     showString(string.c_str(), MainLine);
-    _needDisplay = true;
+    if (isInCallback()) {
+        _needDisplay = true;
+    } else {
+        _display.display();
+    }
 }
 
 void
@@ -165,8 +174,8 @@ void UVMeter::showString(const char* s, uint8_t line)
     _display.setTextColor(WHITE);
     
     if (*s == '\a') {
-    _display.setFont(&Font_Compact_5pt);
-    _display.setCursor(0, line + Font_Compact_5pt_yAdvance);
+        _display.setFont(&Font_Compact_5pt);
+        _display.setCursor(0, line + Font_Compact_5pt_yAdvance);
         s += 1;
     } else {
         _display.setFont(&Font_8x8_8pt);
@@ -181,9 +190,9 @@ UVMeter::handleButtonEvent(const mil::Button& button, mil::ButtonManager::Event 
 {
 	if (button.id() == SelectButton) {
 		if (event == mil::ButtonManager::Event::Click) {
-			sendInput(mil::Input::Click);
+			sendInput(mil::Input::Click, true);
 		} else if (event == mil::ButtonManager::Event::LongPress) {
-			sendInput(mil::Input::LongPress);
+			sendInput(mil::Input::LongPress, true);
 		}
 	}
 }

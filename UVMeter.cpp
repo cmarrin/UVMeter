@@ -42,6 +42,29 @@ UVMeter::setup()
 }   
 
 void
+UVMeter::loop()
+{
+    Application::loop();
+    if (_clock) {
+        _clock->loop();
+    }
+    
+    // Sometimes the SSD1306 display is called from an alternate thread through
+    // the Ticker. This can happen when showMain is called after the showDone
+    // timer fires. It can also happen when a button is pressed and the debounce
+    // timer fires. When the display() function is called it causes a crash.
+    // The stack trace seems to indicate that this might be caused by allocating
+    // or freeing string storage. This might only happen on the ESP8266 since
+    // it uses some hackery to do timer events without having a legit RTOS. At
+    // any rate setting a flag and calling display() from the main loop fixes
+    // the problem.
+    if (_needDisplay) {
+        _display.display();
+        _needDisplay = false;
+    }
+}   
+
+void
 UVMeter::showString(mil::Message m)
 {
     CPString s;
@@ -79,7 +102,7 @@ UVMeter::showString(mil::Message m)
 
     _display.clearDisplay();
     showString(s.c_str(), MessageLine);
-    _display.display();
+    _needDisplay = true;
     startShowDoneTimer(2000);
 }
 
@@ -128,7 +151,7 @@ UVMeter::showMain(bool force)
     string = ToString(i1) + "." + ToString(d1) + " " + ToString(i2) + "." + ToString(d2);
     
     showString(string.c_str(), MainLine);
-    _display.display();
+    _needDisplay = true;
 }
 
 void

@@ -84,14 +84,7 @@ public:
     }
 	
 	virtual void setup() override;
-
-	virtual void loop() override
-    {
-        Application::loop();
-        if (_clock) {
-            _clock->loop();
-        }
-    }   
+	virtual void loop() override;
 
 private:
 	virtual void showString(mil::Message m) override;
@@ -106,5 +99,7 @@ private:
     
 	mil::ButtonManager _buttonManager;
     VEML6075 uv;
+    
+    bool _needDisplay = false;
 
 };

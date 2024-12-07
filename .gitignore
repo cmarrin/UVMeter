@@ -1,3 +1,7 @@
 mac/DerivedData
 mac/UVMeter.xcodeproj/project.xcworkspace/xcuserdata
 mac/UVMeter.xcodeproj/xcuserdata
+build/esp8266.esp8266.d1_mini/UVMeter.ino.bin
+build/esp8266.esp8266.d1_mini/UVMeter.ino.elf
+build/esp8266.esp8266.d1_mini/UVMeter.ino.map
+build

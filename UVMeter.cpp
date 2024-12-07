@@ -15,9 +15,11 @@
 
 static uint8_t Font_8x8_8pt_yAdvance = Font_8x8_8pt.yAdvance;
 static uint8_t Font_Compact_5pt_yAdvance = Font_Compact_5pt.yAdvance;
+#else
+uint8_t Wire;
 #endif
 
-Adafruit_SSD1306 _display(-1);
+Adafruit_SSD1306 _display(128, 64, &Wire, -1);
 
 void
 UVMeter::setup()

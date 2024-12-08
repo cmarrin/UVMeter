@@ -12,11 +12,15 @@
 #ifdef ARDUINO
 #include "Font_8x8_8pt.h"
 #include "Font_Compact_5pt.h"
-
-static uint8_t Font_8x8_8pt_yAdvance = Font_8x8_8pt.yAdvance;
-static uint8_t Font_Compact_5pt_yAdvance = Font_Compact_5pt.yAdvance;
+#include <Fonts/FreeSans9pt7b.h>
+#include <Fonts/FreeSans12pt7b.h>
 #else
 uint8_t Wire;
+uint8_t Font_8x8_8pt = 0;
+uint8_t Font_Compact_5pt = 0;
+uint8_t FreeSans9pt7b = 0;
+uint8_t FreeSans12pt7b = 0;
+
 #endif
 
 Adafruit_SSD1306 _display(128, 64, &Wire, -1);
@@ -68,32 +72,36 @@ void
 UVMeter::showString(mil::Message m)
 {
     CPString s;
+    uint8_t size = 0;
+    
     switch(m) {
         case mil::Message::NetConfig:
-            s = F("\aConfig WiFi\nConnect to\n");
+            s = F("Config WiFi\nConnect to\n");
             s += ConfigPortalName;
             s += F("\npress [sel]\nto retry.");
             break;
         case mil::Message::Startup:
             s = F("UVMeter\nv0.1");
+            size = 2;
             break;
         case mil::Message::Connecting:
-            s = F("\aConnecting...");
+            s = F("Connecting...");
+            size = 1;
             break;
         case mil::Message::NetFail:
-            s = F("\aNetwork failed, press [select] to retry.");
+            s = F("Network failed, press [select] to retry.");
             break;
         case mil::Message::UpdateFail:
-            s = F("\aTime or weather update failed, press [select] to retry.");
+            s = F("Time or weather update failed, press [select] to retry.");
             break;
         case mil::Message::AskRestart:
-            s = F("\aRestart? (long press for yes)");
+            s = F("Restart? (long press for yes)");
             break;
         case mil::Message::AskResetNetwork:
-            s = F("\aReset network? (long press for yes)");
+            s = F("Reset network? (long press for yes)");
             break;
         case mil::Message::VerifyResetNetwork:
-            s = F("\aAre you sure? (long press for yes)");
+            s = F("Are you sure? (long press for yes)");
             break;
         default:
             s = F("Unknown string error");
@@ -101,7 +109,7 @@ UVMeter::showString(mil::Message m)
     }
 
     _display.clearDisplay();
-    showString(s.c_str(), MessageLine);
+    showString(s.c_str(), size, MessageOffset);
     if (isInCallback()) {
         _needDisplay = true;
     } else {
@@ -138,7 +146,7 @@ UVMeter::showMain(bool force)
     }
     
     string += ToString(minute);
-    showString(string.c_str(), TimeDateLine);
+    showString(string.c_str(), 1, TimeDateOffset);
     
     // Now show the UV values. Print with 1 decimal digit
     float v1 = uv.uva();
@@ -156,7 +164,7 @@ UVMeter::showMain(bool force)
     int d2 = int((v2 - i2) * 10);
     string = ToString(i1) + "." + ToString(d1) + " " + ToString(i2) + "." + ToString(d2);
     
-    showString(string.c_str(), MainLine);
+    showString(string.c_str(), 2, MainOffset);
     if (isInCallback()) {
         _needDisplay = true;
     } else {
@@ -169,18 +177,16 @@ UVMeter::showSecondary()
 {
 }
 
-void UVMeter::showString(const char* s, uint8_t line)
+void UVMeter::showString(const char* s, uint8_t size, uint8_t yOffset)
 {
     _display.setTextSize(1);
     _display.setTextColor(WHITE);
+    _display.setCursor(0, yOffset);
     
-    if (*s == '\a') {
-        _display.setFont(&Font_Compact_5pt);
-        _display.setCursor(0, line + Font_Compact_5pt_yAdvance);
-        s += 1;
-    } else {
-        _display.setFont(&Font_8x8_8pt);
-        _display.setCursor(0, line + Font_8x8_8pt_yAdvance);
+    switch (size) {
+        default:    _display.setFont(&Font_8x8_8pt); break;
+        case 1:     _display.setFont(&FreeSans9pt7b); break;
+        case 2:     _display.setFont(&FreeSans12pt7b); break;
     }
         
     _display.print(s); 

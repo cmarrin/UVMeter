@@ -68,10 +68,10 @@ static constexpr const char* Hostname = "uvsensor";
 static constexpr const char* ZipCode = "93405";
 static constexpr uint8_t SelectButton = 0;
 
-static constexpr uint8_t MessageLine = 0;
-static constexpr uint8_t TimeDateLine = 0;
-static constexpr uint8_t TitleLine = 10;
-static constexpr uint8_t MainLine = 20;
+static constexpr uint8_t MessageOffset = 20;
+static constexpr uint8_t TimeDateOffset = 15;
+static constexpr uint8_t TitleOffset = 20;
+static constexpr uint8_t MainOffset = 40;
 
 class UVMeter : public mil::Application
 {
@@ -91,7 +91,7 @@ private:
 	virtual void showMain(bool force = false) override;
     virtual void showSecondary() override;
     
-    void showString(const char* s, uint8_t line);
+    void showString(const char* s, uint8_t size, uint8_t yOffset);
 
     void handleButtonEvent(const mil::Button& button, mil::ButtonManager::Event event);
 

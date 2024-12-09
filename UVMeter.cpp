@@ -71,45 +71,60 @@ UVMeter::loop()
 void
 UVMeter::showString(mil::Message m)
 {
-    CPString s;
+    CPString s1, s2;
     uint8_t size = 0;
+    bool center = false;
+
+    _display.clearDisplay();
     
     switch(m) {
         case mil::Message::NetConfig:
-            s = F("Config WiFi\nConnect to\n");
-            s += ConfigPortalName;
-            s += F("\npress [sel]\nto retry.");
+            s1 = F("Config WiFi\nConnect to\n");
+            s1 += ConfigPortalName;
+            s1 += F("\npress [sel]\nto retry.");
             break;
         case mil::Message::Startup:
-            s = F("UVMeter\nv0.1");
+            s1 = F("UVMeter");
+            s2 = F("v0.1");
             size = 2;
+            center = true;
             break;
         case mil::Message::Connecting:
-            s = F("Connecting...");
+            s1 = F("Connecting...");
             size = 1;
+            center = true;
             break;
         case mil::Message::NetFail:
-            s = F("Network failed, press [select] to retry.");
+            s1 = F("Network failed,\npress [select] to retry.");
+            size = 0;
             break;
         case mil::Message::UpdateFail:
-            s = F("Time or weather update failed, press [select] to retry.");
+            s1 = F("Time or weather update failed,\npress [select] to retry.");
+            size = 0;
             break;
         case mil::Message::AskRestart:
-            s = F("Restart? (long press for yes)");
+            s1 = F("Restart? (long press for yes)");
+            size = 0;
             break;
         case mil::Message::AskResetNetwork:
-            s = F("Reset network? (long press for yes)");
+            s1 = F("Reset network? (long press for yes)");
+            size = 0;
             break;
         case mil::Message::VerifyResetNetwork:
-            s = F("Are you sure? (long press for yes)");
+            s1 = F("Are you sure? (long press for yes)");
+            size = 0;
             break;
         default:
-            s = F("Unknown string error");
+            s1 = F("Unknown string error");
+            size = 0;
             break;
     }
 
-    _display.clearDisplay();
-    showString(s.c_str(), size, MessageOffset);
+    showString(s1.c_str(), size, MessageOffset, center);
+    if (s2.c_str()[0] != '\0') {
+        showString(s2.c_str(), size, MessageOffset2, center);
+    }
+    
     if (isInCallback()) {
         _needDisplay = true;
     } else {
@@ -146,7 +161,7 @@ UVMeter::showMain(bool force)
     }
     
     string += ToString(minute);
-    showString(string.c_str(), 1, TimeDateOffset);
+    showString(string.c_str(), 1, TimeDateOffset, true);
     
     // Now show the UV values. Print with 1 decimal digit
     float v1 = uv.uva();
@@ -164,7 +179,7 @@ UVMeter::showMain(bool force)
     int d2 = int((v2 - i2) * 10);
     string = ToString(i1) + "." + ToString(d1) + " " + ToString(i2) + "." + ToString(d2);
     
-    showString(string.c_str(), 2, MainOffset);
+    showString(string.c_str(), 2, MainOffset, true);
     if (isInCallback()) {
         _needDisplay = true;
     } else {
@@ -177,7 +192,7 @@ UVMeter::showSecondary()
 {
 }
 
-void UVMeter::showString(const char* s, uint8_t size, uint8_t yOffset)
+void UVMeter::showString(const char* s, uint8_t size, uint8_t yOffset, bool center)
 {
     _display.setTextSize(1);
     _display.setTextColor(WHITE);
@@ -188,8 +203,23 @@ void UVMeter::showString(const char* s, uint8_t size, uint8_t yOffset)
         case 1:     _display.setFont(&FreeSans9pt7b); break;
         case 2:     _display.setFont(&FreeSans12pt7b); break;
     }
-        
-    _display.print(s); 
+    
+    _display.setCursor(center ? centerXOffset(s) : 0, yOffset);
+    _display.print(s);
+}
+
+uint16_t
+UVMeter::centerXOffset(const char* s) const
+{
+	int16_t x1, y1;
+	uint16_t w, h;
+	_display.getTextBounds(s, 0, 0, &x1, &y1, &w, &h);
+ 
+    if (w > _display.width()) {
+        return 0;
+    }
+    
+	return(_display.width() - w) / 2;
 }
 
 void

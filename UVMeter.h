@@ -50,6 +50,9 @@ public:
     void write(char) { }
     void print(const char* s) { cout << "[[ " << s << " ]]\n"; }
     void setFont(void*) { }
+    void getTextBounds(const char *string, int16_t x, int16_t y, int16_t *x1,
+                       int16_t *y1, uint16_t *w, uint16_t *h) { }
+    int16_t width() { return 0; }
 };
 
 class VEML6075
@@ -69,9 +72,10 @@ static constexpr const char* ZipCode = "93405";
 static constexpr uint8_t SelectButton = 0;
 
 static constexpr uint8_t MessageOffset = 20;
+static constexpr uint8_t MessageOffset2 = 40;
 static constexpr uint8_t TimeDateOffset = 15;
 static constexpr uint8_t TitleOffset = 20;
-static constexpr uint8_t MainOffset = 40;
+static constexpr uint8_t MainOffset = 50;
 
 class UVMeter : public mil::Application
 {
@@ -91,9 +95,11 @@ private:
 	virtual void showMain(bool force = false) override;
     virtual void showSecondary() override;
     
-    void showString(const char* s, uint8_t size, uint8_t yOffset);
+    void showString(const char* s, uint8_t size, uint8_t yOffset, bool center);
 
     void handleButtonEvent(const mil::Button& button, mil::ButtonManager::Event event);
+    
+    uint16_t centerXOffset(const char* s) const;
 
     std::unique_ptr<mil::Clock> _clock;
     

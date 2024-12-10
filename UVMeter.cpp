@@ -32,7 +32,7 @@ UVMeter::setup()
     _display.clearDisplay();
     _display.display();
     _display.setTextSize(1);
-    _display.setTextColor(WHITE);
+    _display.setTextColor(SSD1306_WHITE);
     Application::setup();
     if (_clock) {
         _clock->setup();
@@ -144,11 +144,13 @@ UVMeter::showMain(bool force)
 	struct tm timeinfo;
     gmtime_r(&t, &timeinfo);
     uint8_t hour = timeinfo.tm_hour;
+    bool pm = false;
 
     if (hour == 0) {
         hour = 12;
     } else if (hour >= 12) {
         if (hour > 12) {
+            pm = true;
             hour -= 12;
         }
     }
@@ -161,8 +163,19 @@ UVMeter::showMain(bool force)
     }
     
     string += ToString(minute);
+    string += pm ? "pm" : "am";
+    string += " ";
+    
+    // Add month and day
+    string += ToString(timeinfo.tm_mon + 1 );
+    string += "/";
+    string += ToString(timeinfo.tm_mday);
+       
     showString(string.c_str(), 1, TimeDateOffset, true);
     
+    // Show UV header
+    showString("uva  uvb", 1, TitleOffset, true, true);
+
     // Now show the UV values. Print with 1 decimal digit
     float v1 = uv.uva();
     if (v1 < 0) {
@@ -175,6 +188,9 @@ UVMeter::showMain(bool force)
     if (v2 < 0) {
         v2 = 0;
     }
+    
+    cout << "UVA=" << ToString(v1) << ", UVB=" << ToString(v2) << "\n";
+
     int i2 = int(v2);
     int d2 = int((v2 - i2) * 10);
     string = ToString(i1) + "." + ToString(d1) + " " + ToString(i2) + "." + ToString(d2);
@@ -192,10 +208,16 @@ UVMeter::showSecondary()
 {
 }
 
-void UVMeter::showString(const char* s, uint8_t size, uint8_t yOffset, bool center)
+void UVMeter::showString(const char* s, uint8_t size, uint8_t yOffset, bool center, bool invert)
 {
     _display.setTextSize(1);
-    _display.setTextColor(WHITE);
+
+    if (invert) {
+        _display.fillRect(0, yOffset - 14, _display.width(), 17, SSD1306_WHITE);
+    }
+    
+    _display.setTextColor(SSD1306_INVERSE);
+    
     _display.setCursor(0, yOffset);
     
     switch (size) {

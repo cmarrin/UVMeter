@@ -35,7 +35,8 @@
 #include <Adafruit_SSD1306.h>
 #else
 #define SSD1306_SWITCHCAPVCC 0
-#define WHITE 0
+#define SSD1306_WHITE 0
+#define SSD1306_INVERSE 0
 
 class Adafruit_SSD1306
 {
@@ -45,7 +46,8 @@ public:
     void clearDisplay() { }
     void display() { }
     void setTextSize(uint8_t) { }
-    void setTextColor(uint8_t) { }
+    void setTextColor(uint16_t) { }
+    void setTextColor(uint16_t, uint16_t) { }
     void setCursor(uint8_t, uint8_t) { }
     void write(char) { }
     void print(const char* s) { cout << "[[ " << s << " ]]\n"; }
@@ -53,6 +55,7 @@ public:
     void getTextBounds(const char *string, int16_t x, int16_t y, int16_t *x1,
                        int16_t *y1, uint16_t *w, uint16_t *h) { }
     int16_t width() { return 0; }
+    void fillRect (int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) { }
 };
 
 class VEML6075
@@ -74,8 +77,8 @@ static constexpr uint8_t SelectButton = 0;
 static constexpr uint8_t MessageOffset = 20;
 static constexpr uint8_t MessageOffset2 = 40;
 static constexpr uint8_t TimeDateOffset = 15;
-static constexpr uint8_t TitleOffset = 20;
-static constexpr uint8_t MainOffset = 50;
+static constexpr uint8_t TitleOffset = 37;
+static constexpr uint8_t MainOffset = 60;
 
 class UVMeter : public mil::Application
 {
@@ -95,7 +98,7 @@ private:
 	virtual void showMain(bool force = false) override;
     virtual void showSecondary() override;
     
-    void showString(const char* s, uint8_t size, uint8_t yOffset, bool center);
+    void showString(const char* s, uint8_t size, uint8_t yOffset, bool center, bool invert = false);
 
     void handleButtonEvent(const mil::Button& button, mil::ButtonManager::Event event);
     

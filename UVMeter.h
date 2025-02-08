@@ -7,22 +7,32 @@
     found in the LICENSE file.
 -------------------------------------------------------------------------*/
 
-// UVMeter uses a Wemos D1 Mini connected to a Wemos OLED shield and a
-// Sparkfun VEML6075 UV sensor to display the UVA and UVB radiation hitting
+// Board: ESP32 C3 Super Mini
+
+// UVMeter is an ESP32 C3 Super Mini based UV meter, using an I2C OLED display
+// and the Sparkfun VEML6075 UV sensor to display the UVA and UVB radiation hitting
 // the sensor. It also displays time, date and weather because they
 // are available from ESPlib.
 //
-// The Wemos display is an I2C device at address 0x3c. The VEML6075 is
-// an I2C device at address 0x10. SDA and SCK at at the standard pins
-// of D1 and D2.
+// The hardware has a button, used to awake from sleep and reset the network.
+//
+// The OLED display is an I2C device at address 0x3c. The VEML6075 is
+// an I2C device at address 0x10.
+//
+// Connections for the C3 Super Mini are as follows:
+//
+//      Pin  8 (GPIO8)      - SDA
+//      Pin  9 (GPIO9)      - SCL
+//      PIN  3 (GPIO3)      - Wake button (N/C button to ground with 10K resister to VCC)
+//      LED_BUILTIN (GPIO8) - On board LED
 //
 // The system will be battery powered by a single 18650 battery connected
 // through a charger and boost converter to provide 5V.
 //
-// I will try to leave the system powered up and in deep sleep until a
-// button is pressed to wake it up. Deep sleep consumes 20us, which should
-// give several years of standby power.
- 
+// After TimeToSleep seconds has elapsed ESP will turn off the display and 
+// go into deep sleep. This consumes 200us, which should give over a year of 
+// standby power with the 18650 battery.
+
 #include "mil.h"
 #include "Application.h"
 #include "Clock.h"
@@ -80,6 +90,9 @@ static constexpr uint8_t TimeDateOffset = 15;
 static constexpr uint8_t TitleOffset = 37;
 static constexpr uint8_t MainOffset = 60;
 
+static constexpr uint8_t TimeToSleep = 30; // In seconds
+static constexpr uint8_t WakeButton = 3;
+
 class UVMeter : public mil::Application
 {
 public:
@@ -108,6 +121,7 @@ private:
     
 	mil::ButtonManager _buttonManager;
     VEML6075 uv;
+	Ticker _sleepTimer;
     
     bool _needDisplay = false;
 

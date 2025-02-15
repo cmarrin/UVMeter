@@ -83,7 +83,7 @@ void
 UVMeter::showString(mil::Message m)
 {
     CPString s1, s2;
-    uint8_t size = 0;
+    FontSize size = FontSize::Compact;
     bool center = false;
 
     _display.clearDisplay();
@@ -97,37 +97,31 @@ UVMeter::showString(mil::Message m)
         case mil::Message::Startup:
             s1 = F("UVMeter");
             s2 = F("v0.1");
-            size = 2;
+            size = FontSize::Medium;
             center = true;
             break;
         case mil::Message::Connecting:
             s1 = F("Connecting...");
-            size = 1;
+            size = FontSize::Small;
             center = true;
             break;
         case mil::Message::NetFail:
             s1 = F("Network failed,\npress [select] to retry.");
-            size = 0;
             break;
         case mil::Message::UpdateFail:
             s1 = F("Time or weather update failed,\npress [select] to retry.");
-            size = 0;
             break;
         case mil::Message::AskRestart:
             s1 = F("Restart? (long press for yes)");
-            size = 0;
             break;
         case mil::Message::AskResetNetwork:
             s1 = F("Reset network? (long press for yes)");
-            size = 0;
             break;
         case mil::Message::VerifyResetNetwork:
             s1 = F("Are you sure? (long press for yes)");
-            size = 0;
             break;
         default:
             s1 = F("Unknown string error");
-            size = 0;
             break;
     }
 
@@ -195,10 +189,22 @@ UVMeter::showMain(bool force)
     string += "/";
     string += ToString(timeinfo.tm_mday);
        
-    showString(string.c_str(), 1, TimeDateOffset, true);
+    showString(string.c_str(), FontSize::Compact, TimeDateOffset, true);
+    
+    // Show weather
+    string = "cur:";
+    string += ToString(_clock->currentTemp());
+    string += " hi:";
+    string += ToString(_clock->highTemp());
+    string += " lo:";
+    string += ToString(_clock->lowTemp());
+    string += " ";
+    string += _clock->weatherConditions();
+
+    showString(string.c_str(), FontSize::Compact, WeatherOffset, true);
     
     // Show UV header
-    showString("uva  uvb", 1, TitleOffset, true, true);
+    showString("uva  uvb", FontSize::Small, UVHeaderOffset, true, true);
 
     // Now show the UV values. Print with 1 decimal digit
     float uva, uvb;
@@ -229,7 +235,7 @@ UVMeter::showSecondary()
     cout << "***** Show Secondary\n";
 }
 
-void UVMeter::showString(const char* s, uint8_t size, uint8_t yOffset, bool center, bool invert)
+void UVMeter::showString(const char* s, FontSize size, uint8_t yOffset, bool center, bool invert)
 {
     _display.setTextSize(1);
 
@@ -242,9 +248,10 @@ void UVMeter::showString(const char* s, uint8_t size, uint8_t yOffset, bool cent
     _display.setCursor(0, yOffset);
     
     switch (size) {
-        default:    _display.setFont(&Font_8x8_8pt); break;
-        case 1:     _display.setFont(&FreeSans9pt7b); break;
-        case 2:     _display.setFont(&FreeSans12pt7b); break;
+        case FontSize::Compact:   _display.setFont(&Font_Compact_5pt); break;
+        case FontSize::Small:     _display.setFont(&FreeSans9pt7b); break;
+        case FontSize::Medium:    _display.setFont(&FreeSans12pt7b); break;
+        case FontSize::Large:     _display.setFont(&Font_8x8_8pt); break;
     }
     
     _display.setCursor(center ? centerXOffset(s) : 0, yOffset);

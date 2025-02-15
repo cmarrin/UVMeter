@@ -226,6 +226,7 @@ UVMeter::showMain(bool force)
 void
 UVMeter::showSecondary()
 {
+    cout << "***** Show Secondary\n";
 }
 
 void UVMeter::showString(const char* s, uint8_t size, uint8_t yOffset, bool center, bool invert)

@@ -97,7 +97,7 @@ static constexpr uint8_t WeatherOffset = 20;
 static constexpr uint8_t UVHeaderOffset = 37;
 static constexpr uint8_t UVValuesOffset = 60;
 
-static constexpr uint8_t TimeToSleep = 30; // In seconds
+static constexpr uint32_t TimeToSleep = 30; //5 * 60; // In seconds
 static constexpr uint8_t WakeButton = 3;
 
 class UVMeter : public mil::Application

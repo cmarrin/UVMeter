@@ -38,7 +38,7 @@ UVMeter::setup()
         _clock->setup();
     }
 
-    _buttonManager.addButton(mil::Button(SelectButton, SelectButton, false, mil::Button::PinMode::Pullup));
+    _buttonManager.addButton(mil::Button(SelectButton, SelectButton, false, mil::Button::PinMode::Float));
 
     if (!uv.begin()) {
         cout << "******** Failed to communicate with VEML6075 sensor, check wiring?";

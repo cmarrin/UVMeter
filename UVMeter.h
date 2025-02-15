@@ -23,7 +23,7 @@
 //
 //      Pin  8 (GPIO8)      - SDA
 //      Pin  9 (GPIO9)      - SCL
-//      PIN  3 (GPIO3)      - Wake button (N/C button to ground with 10K resister to VCC)
+//      PIN  3 (GPIO3)      - Wake button (N/O button to ground with 10K resister to VCC)
 //      LED_BUILTIN (GPIO8) - On board LED
 //
 // The system will be battery powered by a single 18650 battery connected
@@ -32,6 +32,17 @@
 // After TimeToSleep seconds has elapsed ESP will turn off the display and 
 // go into deep sleep. This consumes 200us, which should give over a year of 
 // standby power with the 18650 battery.
+//
+// Hardware hookup:
+//
+//      C3 (5v)         - Charger (V0+)
+//      C3 (G)          - Charger (V0-) - 6075 (Gnd) - Disp (Gnd) - Switch (A)
+//      C3 (3.3)        - 6075 (3.3v)   - Disp (Vcc) - 10kΩ (A)
+//      C3 (3)          - Switch (B)    - 10kΩ (B)
+//      C3 (8)          - 6075 (SDA)    - Disp (SDA)
+//      C3 (9)          - 6075 (SCL)    - Disp (SCL)
+//      Charger (B+)    - Battery (+)
+//      Charger (B-)    - Battery (-)
 
 #include "mil.h"
 #include "Application.h"

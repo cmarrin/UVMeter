@@ -173,12 +173,12 @@ UVMeter::showMain(bool force)
     if (hour == 0) {
         hour = 12;
     } else if (hour >= 12) {
+        pm = true;
         if (hour > 12) {
-            pm = true;
             hour -= 12;
         }
     }
-    string += ToString(hour);
+    string = ToString(hour);
     string += ":";
 
     uint8_t minute = timeinfo.tm_min;

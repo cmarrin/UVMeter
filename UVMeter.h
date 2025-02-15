@@ -47,6 +47,11 @@
 #define SSD1306_SWITCHCAPVCC 0
 #define SSD1306_WHITE 0
 #define SSD1306_INVERSE 0
+#define SSD1306_DISPLAYOFF 0
+#define ESP_GPIO_WAKEUP_GPIO_LOW 0
+
+static inline void esp_deep_sleep_enable_gpio_wakeup(uint8_t, uint8_t) { }
+static inline void esp_deep_sleep_start() { }
 
 class Adafruit_SSD1306
 {
@@ -66,6 +71,7 @@ public:
                        int16_t *y1, uint16_t *w, uint16_t *h) { }
     int16_t width() { return 0; }
     void fillRect (int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) { }
+    void ssd1306_command(uint8_t) { }
 };
 
 class VEML6075
@@ -84,11 +90,12 @@ static constexpr const char* Hostname = "uvsensor";
 static constexpr const char* ZipCode = "93405";
 static constexpr uint8_t SelectButton = 0;
 
-static constexpr uint8_t MessageOffset = 20;
-static constexpr uint8_t MessageOffset2 = 40;
-static constexpr uint8_t TimeDateOffset = 15;
-static constexpr uint8_t TitleOffset = 37;
-static constexpr uint8_t MainOffset = 60;
+static constexpr uint8_t MessageOffset = 20;    // For network messages, etc.
+static constexpr uint8_t MessageOffset2 = 40;   // Second line for messages
+static constexpr uint8_t TimeDateOffset = 10;
+static constexpr uint8_t WeatherOffset = 20;
+static constexpr uint8_t UVHeaderOffset = 37;
+static constexpr uint8_t UVValuesOffset = 60;
 
 static constexpr uint8_t TimeToSleep = 30; // In seconds
 static constexpr uint8_t WakeButton = 3;
@@ -96,6 +103,8 @@ static constexpr uint8_t WakeButton = 3;
 class UVMeter : public mil::Application
 {
 public:
+    enum class FontSize { Compact, Small, Medium, Large };
+    
 	UVMeter()
 		: mil::Application(LED_BUILTIN, Hostname, ConfigPortalName)
 		, _buttonManager([this](const mil::Button& b, mil::ButtonManager::Event e) { handleButtonEvent(b, e); })
@@ -111,7 +120,7 @@ private:
 	virtual void showMain(bool force = false) override;
     virtual void showSecondary() override;
     
-    void showString(const char* s, uint8_t size, uint8_t yOffset, bool center, bool invert = false);
+    void showString(const char* s, FontSize, uint8_t yOffset, bool center, bool invert = false);
 
     void handleButtonEvent(const mil::Button& button, mil::ButtonManager::Event event);
     

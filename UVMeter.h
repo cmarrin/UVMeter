@@ -116,6 +116,8 @@ private:
     void handleButtonEvent(const mil::Button& button, mil::ButtonManager::Event event);
     
     uint16_t centerXOffset(const char* s) const;
+    
+    void getUVValues(float& uva, float& uvb);
 
     std::unique_ptr<mil::Clock> _clock;
     

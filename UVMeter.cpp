@@ -146,6 +146,19 @@ UVMeter::showString(mil::Message m)
 }
 
 void
+UVMeter::getUVValues(float& uva, float& uvb)
+{
+    uva = uv.uva();
+    if (uva < 0) {
+        uva = 0;
+    }
+    uvb = uv.uvb();
+    if (uvb < 0) {
+        uvb = 0;
+    }
+}
+
+void
 UVMeter::showMain(bool force)
 {
     _display.clearDisplay();
@@ -188,25 +201,21 @@ UVMeter::showMain(bool force)
     showString("uva  uvb", 1, TitleOffset, true, true);
 
     // Now show the UV values. Print with 1 decimal digit
-    float v1 = uv.uva();
-    if (v1 < 0) {
-        v1 = 0;
-    }
-    int i1 = int(v1);
-    int d1 = int((v1 - i1) * 10);
+    float uva, uvb;
+    getUVValues(uva, uvb);
     
-    float v2 = uv.uvb();
-    if (v2 < 0) {
-        v2 = 0;
-    }
-    
-    cout << "UVA=" << ToString(v1) << ", UVB=" << ToString(v2) << "\n";
+#ifdef DEBUG_UV
+    cout << "UVA=" << ToString(uva) << ", UVB=" << ToString(uvb) << "\n";
+#endif
 
-    int i2 = int(v2);
-    int d2 = int((v2 - i2) * 10);
-    string = ToString(i1) + "." + ToString(d1) + " " + ToString(i2) + "." + ToString(d2);
+    int iuva = int(uva);
+    int duva = int((uva - iuva) * 10);
+    int iuvb = int(uvb);
+    int duvb = int((uvb - iuvb) * 10);
+
+    string = ToString(iuva) + "." + ToString(duva) + " " + ToString(iuvb) + "." + ToString(duvb);
     
-    showString(string.c_str(), 2, MainOffset, true);
+    showString(string.c_str(), FontSize::Medium, UVValuesOffset, true);
     if (isInCallback()) {
         _needDisplay = true;
     } else {

@@ -20,7 +20,6 @@ uint8_t Font_8x8_8pt = 0;
 uint8_t Font_Compact_5pt = 0;
 uint8_t FreeSans9pt7b = 0;
 uint8_t FreeSans12pt7b = 0;
-
 #endif
 
 Adafruit_SSD1306 _display(128, 64, &Wire, -1);
@@ -41,7 +40,11 @@ UVMeter::setup()
     _buttonManager.addButton(mil::Button(SelectButton, SelectButton, false, mil::Button::PinMode::Float));
 
     if (!uv.begin()) {
-        cout << "******** Failed to communicate with VEML6075 sensor, check wiring?";
+        cout << "******** Failed to communicate with VEML6075 sensor, check wiring?\n";
+    } else {
+        float uva, uvb;
+        getUVValues(uva, uvb);
+        cout << "VEML6075 connected. UVA=" << ToString(uva) << ", UVB=" << ToString(uvb) << "\n";
     }
     
     // Setup sleep timer. When it fires, device will go to deep sleep

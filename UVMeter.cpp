@@ -48,7 +48,7 @@ UVMeter::setup()
     }
     
     // Setup sleep timer. When it fires, device will go to deep sleep
-	_sleepTimer.once(TimeToSleep, [this]() {
+	_sleepTimer.once_ms(TimeToSleep * 1000, [this]() {
         cout << "***** GOING TO SLEEP...\n";
         _display.ssd1306_command(SSD1306_DISPLAYOFF);
         esp_deep_sleep_enable_gpio_wakeup(1 << WakeButton, ESP_GPIO_WAKEUP_GPIO_LOW);

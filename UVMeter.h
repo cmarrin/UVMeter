@@ -88,7 +88,7 @@ static constexpr const char* ConfigPortalName = "MT UVMeter";
 static constexpr const char* Hostname = "uvsensor";
 
 static constexpr const char* ZipCode = "93405";
-static constexpr uint8_t SelectButton = 0;
+static constexpr uint8_t SelectButton = 3;
 
 static constexpr uint8_t MessageOffset = 20;    // For network messages, etc.
 static constexpr uint8_t MessageOffset2 = 40;   // Second line for messages

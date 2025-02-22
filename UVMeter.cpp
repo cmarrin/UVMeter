@@ -37,24 +37,43 @@ UVMeter::setup()
         _clock->setup();
     }
 
+    setHaveUserQuestions(true, false);
+    
     _buttonManager.addButton(mil::Button(SelectButton, SelectButton, false, mil::Button::PinMode::Float));
 
-    if (!uv.begin()) {
+    if (!_uv.begin()) {
         cout << "******** Failed to communicate with VEML6075 sensor, check wiring?\n";
+        _uvWorking = false;
     } else {
         float uva, uvb;
         getUVValues(uva, uvb);
+        _uvWorking = true;
         cout << "VEML6075 connected. UVA=" << ToString(uva) << ", UVB=" << ToString(uvb) << "\n";
     }
     
     // Setup sleep timer. When it fires, device will go to deep sleep
 	_sleepTimer.once_ms(TimeToSleep * 1000, [this]() {
-        cout << "***** GOING TO SLEEP...\n";
-        _display.ssd1306_command(SSD1306_DISPLAYOFF);
-        esp_deep_sleep_enable_gpio_wakeup(1 << WakeButton, ESP_GPIO_WAKEUP_GPIO_LOW);
-        esp_deep_sleep_start();
+        gotoSleep();
     });
-}   
+}
+
+void
+UVMeter::gotoSleep()
+{
+    cout << "***** GOING TO SLEEP...\n";
+    _display.ssd1306_command(SSD1306_DISPLAYOFF);
+    esp_deep_sleep_enable_gpio_wakeup(1 << WakeButton, ESP_GPIO_WAKEUP_GPIO_LOW);
+    esp_deep_sleep_start();
+}
+
+void
+UVMeter::preUserAnswer()
+{
+    _display.clearDisplay();
+    _display.display();
+    delay(3000);
+    gotoSleep();
+}
 
 void
 UVMeter::loop()
@@ -89,6 +108,10 @@ UVMeter::showString(mil::Message m)
     _display.clearDisplay();
     
     switch(m) {
+        case mil::Message::AskPreUserQuestion:
+            s1 = F("Turn Off?\n(long press for yes)");
+            center = true;
+            break;
         case mil::Message::NetConfig:
             s1 = F("Config WiFi\nConnect to\n");
             s1 += ConfigPortalName;
@@ -112,13 +135,13 @@ UVMeter::showString(mil::Message m)
             s1 = F("Time or weather update failed,\npress [select] to retry.");
             break;
         case mil::Message::AskRestart:
-            s1 = F("Restart? (long press for yes)");
+            s1 = F("Restart?\n(long press for yes)");
             break;
         case mil::Message::AskResetNetwork:
-            s1 = F("Reset network? (long press for yes)");
+            s1 = F("Reset network?\n(long press for yes)");
             break;
         case mil::Message::VerifyResetNetwork:
-            s1 = F("Are you sure? (long press for yes)");
+            s1 = F("Are you sure?\n(long press for yes)");
             break;
         default:
             s1 = F("Unknown string error");
@@ -142,11 +165,11 @@ UVMeter::showString(mil::Message m)
 void
 UVMeter::getUVValues(float& uva, float& uvb)
 {
-    uva = uv.uva();
+    uva = _uv.uva();
     if (uva < 0) {
         uva = 0;
     }
-    uvb = uv.uvb();
+    uvb = _uv.uvb();
     if (uvb < 0) {
         uvb = 0;
     }
@@ -206,20 +229,24 @@ UVMeter::showMain(bool force)
     // Show UV header
     showString("uva  uvb", FontSize::Small, UVHeaderOffset, true, true);
 
-    // Now show the UV values. Print with 1 decimal digit
-    float uva, uvb;
-    getUVValues(uva, uvb);
-    
+    if (_uvWorking) {
+        // Now show the UV values. Print with 1 decimal digit
+        float uva, uvb;
+        getUVValues(uva, uvb);
+        
 #ifdef DEBUG_UV
-    cout << "UVA=" << ToString(uva) << ", UVB=" << ToString(uvb) << "\n";
+        cout << "UVA=" << ToString(uva) << ", UVB=" << ToString(uvb) << "\n";
 #endif
 
-    int iuva = int(uva);
-    int duva = int((uva - iuva) * 10);
-    int iuvb = int(uvb);
-    int duvb = int((uvb - iuvb) * 10);
+        int iuva = int(uva);
+        int duva = int((uva - iuva) * 10);
+        int iuvb = int(uvb);
+        int duvb = int((uvb - iuvb) * 10);
 
-    string = ToString(iuva) + "." + ToString(duva) + " " + ToString(iuvb) + "." + ToString(duvb);
+        string = ToString(iuva) + "." + ToString(duva) + " " + ToString(iuvb) + "." + ToString(duvb);
+    } else {
+        string = "---- ----";
+    }
     
     showString(string.c_str(), FontSize::Medium, UVValuesOffset, true);
     if (isInCallback()) {

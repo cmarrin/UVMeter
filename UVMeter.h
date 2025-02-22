@@ -130,6 +130,10 @@ private:
 	virtual void showString(mil::Message m) override;
 	virtual void showMain(bool force = false) override;
     virtual void showSecondary() override;
+
+    virtual void preUserAnswer() override;
+    
+    void gotoSleep();
     
     void showString(const char* s, FontSize, uint8_t yOffset, bool center, bool invert = false);
 
@@ -142,9 +146,10 @@ private:
     std::unique_ptr<mil::Clock> _clock;
     
 	mil::ButtonManager _buttonManager;
-    VEML6075 uv;
+    VEML6075 _uv;
 	Ticker _sleepTimer;
     
     bool _needDisplay = false;
+    bool _uvWorking = false;
 
 };

@@ -41,20 +41,31 @@ UVMeter::setup()
     
     _buttonManager.addButton(mil::Button(SelectButton, SelectButton, false, mil::Button::PinMode::Float));
 
+    _uvWorking = false;
+    
     if (!_uv.begin()) {
-        cout << "******** Failed to communicate with VEML6075 sensor, check wiring?\n";
-        _uvWorking = false;
+        cout << "******** Failed to communicate with UV sensor, check wiring?\n";
     } else {
-        float uva, uvb;
-        getUVValues(uva, uvb);
-        _uvWorking = true;
-        cout << "VEML6075 connected. UVA=" << ToString(uva) << ", UVB=" << ToString(uvb) << "\n";
+        if (!_uv.prepareMeasurement(MEAS_MODE_CMD)) {
+            cout << "******** Failed to set UV measurement mode\n";
+        } else {
+            _uvWorking = true;
+            updateUVValues();
+            if (_uvWorking) {
+                cout << "UV sensor connected. UVA=" << ToString(_uva) << ", UVB=" << ToString(_uvb) << "\n";
+            }
+        }
     }
     
     // Setup sleep timer. When it fires, device will go to deep sleep
 	_sleepTimer.once_ms(TimeToSleep * 1000, [this]() {
         gotoSleep();
     });
+
+    // Setup UV sensor to take a reading every second
+//    _uvSampleTimer.attach_ms(UVSampleRate, [this]() {
+//        updateUVValues();
+//    });
 }
 
 void
@@ -78,6 +89,8 @@ UVMeter::preUserAnswer()
 void
 UVMeter::loop()
 {
+    updateUVValues();
+
     Application::loop();
     if (_clock) {
         _clock->loop();
@@ -163,15 +176,32 @@ UVMeter::showString(mil::Message m)
 }
 
 void
-UVMeter::getUVValues(float& uva, float& uvb)
+UVMeter::updateUVValues()
 {
-    uva = _uv.uva();
-    if (uva < 0) {
-        uva = 0;
-    }
-    uvb = _uv.uvb();
-    if (uvb < 0) {
-        uvb = 0;
+    if (_uvWorking) {
+        if (kSTkErrOk != _uv.setStartState(true)) {
+            cout << "Error starting UV read\n";
+            _uvWorking = false;
+            return;
+        }
+
+        delay(2 + _uv.getConversionTimeMillis());
+        
+         if (kSTkErrOk != _uv.readAllUV()) {
+             cout << "Error reading UV sensor\n";
+             _uvWorking = false;
+             return;
+         }
+
+        _uva = _uv.getUVA();
+        if (_uva < 0) {
+            _uva = 0;
+        }
+        
+        _uvb = _uv.getUVB();
+        if (_uvb < 0) {
+            _uvb = 0;
+        }
     }
 }
 
@@ -231,17 +261,10 @@ UVMeter::showMain(bool force)
 
     if (_uvWorking) {
         // Now show the UV values. Print with 1 decimal digit
-        float uva, uvb;
-        getUVValues(uva, uvb);
-        
-#ifdef DEBUG_UV
-        cout << "UVA=" << ToString(uva) << ", UVB=" << ToString(uvb) << "\n";
-#endif
-
-        int iuva = int(uva);
-        int duva = int((uva - iuva) * 10);
-        int iuvb = int(uvb);
-        int duvb = int((uvb - iuvb) * 10);
+        int iuva = int(_uva);
+        int duva = int((_uva - iuva) * 10);
+        int iuvb = int(_uvb);
+        int duvb = int((_uvb - iuvb) * 10);
 
         string = ToString(iuva) + "." + ToString(duva) + " " + ToString(iuvb) + "." + ToString(duvb);
     } else {
@@ -264,6 +287,8 @@ UVMeter::showSecondary()
 
 void UVMeter::showString(const char* s, FontSize size, uint8_t yOffset, bool center, bool invert)
 {
+cout << "***** showString: \"" << s << "\", size=" << uint8_t(size) << ", offset=" << yOffset << "\n";
+
     _display.setTextSize(1);
 
     if (invert) {

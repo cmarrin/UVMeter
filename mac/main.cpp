@@ -35,6 +35,11 @@ int main(int argc, const char * argv[])
         uvmeter.loop();
 
         int c = getc();
+        
+if (c != 0) {
+    cout << "Got a key!!!\n";
+}
+
         if (c == '1') {
             cout << " Got Click\n";
             uvmeter.sendInput(mil::Input::Click, false);

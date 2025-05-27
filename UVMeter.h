@@ -10,7 +10,7 @@
 // Board: ESP32 C3 Super Mini
 
 // UVMeter is an ESP32 C3 Super Mini based UV meter, using an I2C OLED display
-// and the Sparkfun VEML6075 UV sensor to display the UVA and UVB radiation hitting
+// and the Sparkfun AS7331 UV sensor to display the UVA and UVB radiation hitting
 // the sensor. It also displays time, date and weather because they
 // are available from ESPlib.
 //
@@ -49,9 +49,11 @@
 #include "Clock.h"
 #include "ButtonManager.h"
 
+#define DEBUG_UV
+
 #ifdef ARDUINO
-#include "SparkFun_VEML6075_Arduino_Library.h"
 #include <Wire.h>
+#include <SparkFun_AS7331.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #else
@@ -60,6 +62,8 @@
 #define SSD1306_INVERSE 0
 #define SSD1306_DISPLAYOFF 0
 #define ESP_GPIO_WAKEUP_GPIO_LOW 0
+#define MEAS_MODE_CMD 0
+#define kSTkErrOk 0
 
 static inline void esp_deep_sleep_enable_gpio_wakeup(uint8_t, uint8_t) { }
 static inline void esp_deep_sleep_start() { }
@@ -85,12 +89,16 @@ public:
     void ssd1306_command(uint8_t) { }
 };
 
-class VEML6075
+class SfeAS7331ArdI2C
 {
 public:
     bool begin() { return true; }
-    float uva() { return 1.532; }
-    float uvb() { return 2.145; }
+    float getUVA() { return 1.532; }
+    float getUVB() { return 2.145; }
+    bool prepareMeasurement(uint8_t) { return true; }
+    uint8_t setStartState(bool) { return 0; }
+    uint16_t getConversionTimeMillis() { return 0; }
+    uint8_t readAllUV() { return 0; }
 };
 
 #endif
@@ -110,6 +118,8 @@ static constexpr uint8_t UVValuesOffset = 60;
 
 static constexpr uint32_t TimeToSleep = 5 * 60; // In seconds
 static constexpr uint8_t WakeButton = 3;
+
+static constexpr uint32_t UVSampleRate = 1000; // In ms
 
 class UVMeter : public mil::Application
 {
@@ -141,13 +151,19 @@ private:
     
     uint16_t centerXOffset(const char* s) const;
     
-    void getUVValues(float& uva, float& uvb);
+    void updateUVValues();
+    float uva() const { return _uva; }
+    float uvb() const { return _uvb; }
 
     std::unique_ptr<mil::Clock> _clock;
     
 	mil::ButtonManager _buttonManager;
-    VEML6075 _uv;
+    SfeAS7331ArdI2C _uv;
+    float _uva = 0;
+    float _uvb = 0;
+    
 	Ticker _sleepTimer;
+	Ticker _uvSampleTimer;
     
     bool _needDisplay = false;
     bool _uvWorking = false;

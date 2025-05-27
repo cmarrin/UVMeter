@@ -132,7 +132,7 @@
 				49EB4BA32CF778D10083A081 /* TimeWeatherServer.cpp */,
 			);
 			name = ESPlib;
-			path = ../ESPlib;
+			path = ../../ESPlib;
 			sourceTree = "<group>";
 		};
 		49EB59502CF7A5F60083A081 /* esp */ = {

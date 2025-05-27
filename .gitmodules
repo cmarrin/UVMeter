@@ -1,3 +1,0 @@
-[submodule "ESPlib"]
-	path = ESPlib
-	url = git@github.com:cmarrin/ESPlib.git
